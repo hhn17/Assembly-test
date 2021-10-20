@@ -1,36 +1,40 @@
     .8byte    
-    .global array_swap      // Export symbol
+    .global array_swap    // Export symbol
 
-array_swap:                 // X0 -> first parameter
-                            // X1 -> output array_ptr
+array_swap:           // X0 -> first parameter
+                      // X1 -> output array_ptr
 
 /************Begin Implementation here**************/
-//task2
-//assume array in x0        //the array has already been load into address x0+offset
-      orr x14, xzr, xzr     //i=0 x14
-LOOP: sub x10, x14, #32     //i=32
-      cbz x10, END
+		orr x14,xzr,xzr		//i=0
+		add x14,x14,#31		//i=31
+		orr x9,xzr,xzr 		//j=0
+	
+LOOP:	sub x15,x9,32		//x15=j-32
+		cbz x15,End			//quit when j=32
+		
+		lsl x13,x14,#3		//x13=i*8
+		add x12,x0,x13		//&x12=Input_array[i]
+		ldur x11,[x12,0]	//x11=Input_array[i]
+		
+		lsl x13,x9,#3		//x13=j*8
+		add x12,x1,x13		//&x12=Output_array[j]
+		ldur x10,[x12,0]	//x10=Output_array[j]
+		
+		add x10,x11,xzr		//x10=x11; 
+		stur x10,[x12,0]	//Output_array[j]=Input_array[i]
+		
+		add x9,x9,#1		//j=j+1
+		sub x14,x14,#1		//i=i-1
+		b LOOP
 
-      lsl x11, x14, #3      //i*8
-      add x12, x0, x11      //x12 input address
-      add x13, x1, x11      //x13 output address
-
-      ldur x3, [x12, 0]     //load A[i]
-      stur x3, [x13, 8]     //A[i+1]=temp
-      ldur x4, [x12, 8]     //load A[i+1]
-      stur x4, [x13, 0]     //A[i]=A[i+1]
-
-      ldur x3, [x12, 16]     //load A[i]
-      stur x3, [x13, 16]     //storeA[i]
-      ldur x4, [x12, 24]     //load A[i+1]
-      stur x4, [x13, 24]     //storeA[i+1]
-
-      add x14, x14, #4      //i=i+4
-      b LOOP
 
 END:
+		
+
+
 /************End Implementation here****************/
 
 // This returns back to C code
     BR x30
+
 
