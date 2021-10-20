@@ -5,22 +5,39 @@
 array_even_odd:             // X0 -> input array_ptr
 
 /************Begin Implementation here**************/
-	AND X1, X1, #0		// X1 = 0. Loop Counter
-for_loop:
-	LDUR X2, [X0]		// Get an element of the input array
-	AND X3, X1, #1		// Get the least significant bit
-	CBZ X3, its_odd		// Check if the current index is even or odd
-	
-	LSL X2, X2, #1		// If its even, left shift by one bit
-	B continue
-its_odd:
-	RSL X2, X2, #1		// If its odd, right shift by one bit	
-continue:
-	STUR X2, [X0]		// Store it back
-	ADD X0, X0, #8		// Move on to the next array element
-	ADD X1, X1, #1		// Increment loop counter
-	CMP X2, #32			// Check if we have manipulated all the elements
-	B for_loop			// If not, repeat
+				orr x14,xzr,xzr 	//i=0;
+	EVEN_LOOP:	sub x15,x14,#32 	//x15=x14-32
+				cbz x15,EVEN_END
+
+				lsl x13,x14,#3		//x13=i*8
+				add x12,x0,x13		//x12=address of A[i]
+
+				ldur x11,[x12,0]	//x11=A[i]
+				lsl x11,x11,#1		//x13<<1
+				stur x11,[x12,0]	//A[i]=x13
+				add x14,x14,#2		//i=i+2
+				b EVEN_LOOP
+
+	EVEN_END:	orr x14,xzr,xzr
+				orr x15,xzr,xzr
+				orr x13,xzr,xzr
+				orr x12,xzr,xzr
+				orr x11,xzr,xzr
+
+				add x14,x14,#1		//i=1
+	ODD_LOOP:	sub x15,x14,#33		//x15=x14-33
+				cbz x15,END			//quit if i=33
+
+				lsl x13,x14,#3		//i=i*8
+				add x12,x0,x13		//&x12=A[i]
+
+				ldur x11,[x12,0]	//x11=A[i]
+				lsr x11,x11,#1		//x11>>1
+				stur x11,[x12,0]	//A[i]=x11
+				add x14,x14,#2		//i=i+2
+				b ODD_LOOP
+
+	END:
 /************End Implementation here****************/
 
 // This returns back to C code
